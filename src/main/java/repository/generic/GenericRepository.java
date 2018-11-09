@@ -15,6 +15,8 @@ public interface GenericRepository<T> {
 
     List<T> searchAlikeColumn(Map<String, String> keyValues);
 
+    List<T> searchAlikeColumn(Map<String, List<String>> keyValues, String logicalOperator);
+
     List<T> searchExactColumn(List<String> values, String columnName);
 
     List<T> searchExactColumn(Map<String, List<String>> keyValues, String logicalOperator);

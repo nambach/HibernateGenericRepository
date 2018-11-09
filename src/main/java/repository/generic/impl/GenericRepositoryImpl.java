@@ -149,6 +149,62 @@ public abstract class GenericRepositoryImpl<T extends GenericEntity> implements 
         }
     }
 
+    @Override
+    public List<T> searchAlikeColumn(Map<String, List<String>> keyValues, String logicalOperator) {
+        List<T> list = new ArrayList<>();
+        try (Session session = sessionFactory.openSession()) {
+            session.beginTransaction();
+
+            //e.g
+            // (name LIKE :name0 OR name LIKE :name1)
+            // AND/OR
+            // (author LIKE :author0 OR author LIKE :author1)
+            String queryParams = getAlikeQueryParam(keyValues, logicalOperator);
+
+            Query<T> query = session.createQuery("from " + tableName + " where " + queryParams, clazz);
+
+            keyValues.forEach((column, values) -> {
+                for (int i = 0; i < values.size(); i++) {
+                    query.setParameter(String.format("%s%d", column, i), values.get(i), StringNVarcharType.INSTANCE);
+                }
+            });
+
+            list = query.list();
+
+            session.close();
+            return list;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return list;
+        }
+    }
+
+    /**
+     * Additional function for above searchAlikeColumn function
+     *
+     * @param keyValues column - values
+     * @param logicalOperator "OR" / "AND"
+     * @return a string with below format
+     * ([columnA] LIKE :[columnA][index] OR ...) AND/OR ([columnB] LIKE :[columnB][index] OR ...)
+     */
+    private String getAlikeQueryParam(Map<String, List<String>> keyValues, String logicalOperator) {
+        List<String> columns = new ArrayList<>();
+
+        //e.g
+        // name LIKE :name0 OR name LIKE :name1 OR name LIKE :name2
+        keyValues.forEach((column, values) -> {
+
+            String valueSet = values.stream()
+                    .map(value -> String.format("%s LIKE :%s%d", column, column, values.indexOf(value)))
+                    .collect(Collectors.joining(" OR ", " (", ") "));
+
+            columns.add(valueSet);
+        });
+
+        return columns.stream()
+                .collect(Collectors.joining(logicalOperator));
+    }
+
     public List<T> searchExactColumn(List<String> values, String columnName) {
         List<T> list = new ArrayList<>();
         try (Session session = sessionFactory.openSession()) {
@@ -203,10 +259,18 @@ public abstract class GenericRepositoryImpl<T extends GenericEntity> implements 
         }
     }
 
-    private String getExactQueryParam(Map<String, List<String>> keyValue, String logicalOperator) {
+    /**
+     * Additional function for above searchExactColumn function
+     *
+     * @param keyValues column - values
+     * @param logicalOperator "OR" / "AND"
+     * @return a string with below format
+     * [columnA] IN (:[columnA][index], ...) AND/OR [columnB] IN (:[columnB][index], ...)
+     */
+    private String getExactQueryParam(Map<String, List<String>> keyValues, String logicalOperator) {
         List<String> columns = new ArrayList<>();
 
-        keyValue.forEach((column, values) -> {
+        keyValues.forEach((column, values) -> {
             // (:[columnName][index], ...)
             //e.g
             // (:id0, id1, id2)
