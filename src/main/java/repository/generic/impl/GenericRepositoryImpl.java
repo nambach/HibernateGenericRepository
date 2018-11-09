@@ -49,6 +49,7 @@ public abstract class GenericRepositoryImpl<T extends GenericEntity> implements 
         getTableName();
     }
 
+    @Override
     public void insertOrReplace(T toReplace) {
         try (Session session = sessionFactory.openSession()) {
             session.beginTransaction();
@@ -62,6 +63,7 @@ public abstract class GenericRepositoryImpl<T extends GenericEntity> implements 
         }
     }
 
+    @Override
     public void insertOrReplaceBatch(List<T> entities) {
         try (Session session = sessionFactory.openSession()) {
             session.beginTransaction();
@@ -82,6 +84,7 @@ public abstract class GenericRepositoryImpl<T extends GenericEntity> implements 
         }
     }
 
+    @Override
     public void updateProperties(T toReplace, String... properties) {
         try (Session session = sessionFactory.openSession()) {
             session.beginTransaction();
@@ -110,36 +113,12 @@ public abstract class GenericRepositoryImpl<T extends GenericEntity> implements 
         }
     }
 
+    @Override
     public List<T> searchAll() {
         List<T> list = new ArrayList<>();
         try (Session session = sessionFactory.openSession()) {
             session.beginTransaction();
             list = session.createQuery("from " + tableName, clazz).list();
-
-            session.close();
-            return list;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return list;
-        }
-    }
-
-    public List<T> searchAlikeColumn(Map<String, String> keyValues) {
-        List<T> list = new ArrayList<>();
-        try (Session session = sessionFactory.openSession()) {
-            session.beginTransaction();
-
-            //e.g: key1 LIKE :key1 OR key2 LIKE :key2
-            String queryParams = keyValues.keySet()
-                    .stream()
-                    .map(s -> s + " like :" + s)
-                    .collect(Collectors.joining(" or "));
-
-            Query<T> query = session.createQuery("from " + tableName + " where " + queryParams, clazz);
-
-            keyValues.forEach((key, value) -> query.setParameter(key, "%" + value + "%", StringNVarcharType.INSTANCE));
-
-            list = query.list();
 
             session.close();
             return list;
@@ -205,30 +184,6 @@ public abstract class GenericRepositoryImpl<T extends GenericEntity> implements 
                 .collect(Collectors.joining(logicalOperator));
     }
 
-    public List<T> searchExactColumn(List<String> values, String columnName) {
-        List<T> list = new ArrayList<>();
-        try (Session session = sessionFactory.openSession()) {
-            session.beginTransaction();
-
-            //e.g: id IN (:param0, :param1, :param2)
-            String queryParams = columnName + " in " + values.stream().map(s -> ":param" + values.indexOf(s)).collect(Collectors.joining(", ", "(", ")"));
-
-            Query<T> query = session.createQuery("from " + tableName + " where " + queryParams, clazz);
-
-            for (int i = 0; i < values.size(); i++) {
-                query.setParameter("param" + i, values.get(i), StringNVarcharType.INSTANCE);
-            }
-
-            list = query.list();
-
-            session.close();
-            return list;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return list;
-        }
-    }
-
     @Override
     public List<T> searchExactColumn(Map<String, List<String>> keyValues, String logicalOperator) {
         List<T> list = new ArrayList<>();
@@ -285,6 +240,7 @@ public abstract class GenericRepositoryImpl<T extends GenericEntity> implements 
                 .collect(Collectors.joining(" " + logicalOperator + " ", " ", " "));
     }
 
+    @Override
     public T findById(T entity) {
         Session session = null;
         try {
@@ -312,6 +268,7 @@ public abstract class GenericRepositoryImpl<T extends GenericEntity> implements 
         }
     }
 
+    @Override
     public T delete(T toDelete) {
         try (Session session = sessionFactory.openSession()) {
             session.beginTransaction();
@@ -330,6 +287,7 @@ public abstract class GenericRepositoryImpl<T extends GenericEntity> implements 
         }
     }
 
+    @Override
     public void truncateTable() {
         try (Session session = sessionFactory.openSession()) {
             session.beginTransaction();
