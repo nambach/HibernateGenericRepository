@@ -1,5 +1,5 @@
 import model.Product;
-import repository.impl.GenericRepositoryImpl;
+import repository.generic.impl.GenericRepositoryImpl;
 
 import java.util.HashMap;
 

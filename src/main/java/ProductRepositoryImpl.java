@@ -1,6 +1,6 @@
 import model.Product;
 import org.hibernate.SessionFactory;
-import repository.impl.GenericRepositoryImpl;
+import repository.generic.impl.GenericRepositoryImpl;
 
 public class ProductRepositoryImpl extends GenericRepositoryImpl<Product> {
 

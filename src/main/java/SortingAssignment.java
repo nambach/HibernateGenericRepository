@@ -1,6 +1,4 @@
-import util.HeapSort;
-import util.MergeSort;
-import util.QuickSort;
+import util.SortUtils;
 
 import java.util.Map;
 import java.util.Random;
@@ -20,6 +18,8 @@ public class SortingAssignment {
     public static Map<String, Integer> count;
 
     private static String winner = null;
+
+    private static SortUtils sortUtils = null;
 
     private static int[] generateArray(int size) {
         int[] array = new int[size];
@@ -44,6 +44,8 @@ public class SortingAssignment {
         final int[] arr1 = cloneArray(arr);
         final int[] arr2 = cloneArray(arr);
         final int[] arr3 = cloneArray(arr);
+
+        sortUtils = new SortUtils();
 
         ExecutorService executorService = Executors.newCachedThreadPool();
         executorService.execute(startHeapsort(arr1));
@@ -89,7 +91,7 @@ public class SortingAssignment {
     private static Runnable startQuicksort(final int[] arr) {
         return new Runnable() {
             public void run() {
-                QuickSort.sort(arr, 0, arr.length - 1);
+                sortUtils.getQuickSort().sort(arr, 0, arr.length - 1);
                 if (winner == null) {
                     winner = "quickSort";
                 }
@@ -101,7 +103,7 @@ public class SortingAssignment {
     private static Runnable startMergesort(final int[] arr) {
         return new Runnable() {
             public void run() {
-                MergeSort.sort(arr, 0, arr.length - 1);
+                sortUtils.getMergeSort().sort(arr, 0, arr.length - 1);
                 if (winner == null) {
                     winner = "mergeSort";
                 }
@@ -113,7 +115,7 @@ public class SortingAssignment {
     private static Runnable startHeapsort(final int[] arr) {
         return new Runnable() {
             public void run() {
-                HeapSort.sort(arr);
+                sortUtils.getHeapSort().sort(arr);
                 if (winner == null) {
                     winner = "heapSort";
                 }

@@ -1,6 +1,6 @@
 package model;
 
-import repository.GenericEntity;
+import repository.generic.GenericEntity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
