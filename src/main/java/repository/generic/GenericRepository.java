@@ -5,15 +5,11 @@ import java.util.Map;
 
 public interface GenericRepository<T> {
 
-    void insert(T entity);
-
-    void insertBatch(List<T> entities);
-
-    void updateBatch(List<T> entities);
-
     void insertOrReplace(T entity);
 
-    void update(T entity, String... properties);
+    void insertOrReplaceBatch(List<T> entities);
+
+    void updateProperties(T entity, String... properties);
 
     List<T> searchAll();
 
@@ -23,7 +19,9 @@ public interface GenericRepository<T> {
 
     T findById(T entity);
 
+    T findById(String id);
+
     T delete(T entity);
 
-    void clearData();
+    void truncateTable();
 }

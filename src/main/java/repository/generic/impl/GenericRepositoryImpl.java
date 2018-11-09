@@ -49,11 +49,11 @@ public abstract class GenericRepositoryImpl<T extends GenericEntity> implements 
         getTableName();
     }
 
-    public void insert(T entity) {
+    public void insertOrReplace(T toReplace) {
         try (Session session = sessionFactory.openSession()) {
             session.beginTransaction();
 
-            session.save(entity);
+            session.saveOrUpdate(toReplace);
 
             session.getTransaction().commit();
             session.close();
@@ -62,27 +62,7 @@ public abstract class GenericRepositoryImpl<T extends GenericEntity> implements 
         }
     }
 
-    public void insertBatch(List<T> entities) {
-        try (Session session = sessionFactory.openSession()) {
-            session.beginTransaction();
-
-            for (int i = 0; i < entities.size(); i++) {
-                session.save(entities.get(i));
-                if (i % BATCH_SIZE == 0) { // Same as the JDBC batch size
-                    //flush a batch of inserts and release memory:
-                    session.flush();
-                    session.clear();
-                }
-            }
-
-            session.getTransaction().commit();
-            session.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void updateBatch(List<T> entities) {
+    public void insertOrReplaceBatch(List<T> entities) {
         try (Session session = sessionFactory.openSession()) {
             session.beginTransaction();
 
@@ -102,24 +82,7 @@ public abstract class GenericRepositoryImpl<T extends GenericEntity> implements 
         }
     }
 
-    public void insertOrReplace(T toReplace) {
-        try (Session session = sessionFactory.openSession()) {
-            session.beginTransaction();
-
-            T entity = session.get(clazz, toReplace.getEntityId());
-
-            if (entity != null) {
-                session.delete(entity);
-            }
-            session.save(toReplace);
-            session.getTransaction().commit();
-            session.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void update(T toReplace, String... properties) {
+    public void updateProperties(T toReplace, String... properties) {
         try (Session session = sessionFactory.openSession()) {
             session.beginTransaction();
 
@@ -226,6 +189,17 @@ public abstract class GenericRepositoryImpl<T extends GenericEntity> implements 
         }
     }
 
+    @Override
+    public T findById(String id) {
+        try (Session session = sessionFactory.openSession()) {
+
+            return session.get(clazz, id);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public T delete(T toDelete) {
         try (Session session = sessionFactory.openSession()) {
             session.beginTransaction();
@@ -244,7 +218,7 @@ public abstract class GenericRepositoryImpl<T extends GenericEntity> implements 
         }
     }
 
-    public void clearData() {
+    public void truncateTable() {
         try (Session session = sessionFactory.openSession()) {
             session.beginTransaction();
 

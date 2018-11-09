@@ -9,10 +9,10 @@ public class ProductRepositoryImpl extends GenericRepositoryImpl<Product> {
     }
 
     public void updateName(Product product) {
-        update(product, "name");
+        updateProperties(product, "name");
     }
 
     public void updateCategory(Product product) {
-        update(product, "categoryId");
+        updateProperties(product, "categoryId");
     }
 }
