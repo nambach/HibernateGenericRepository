@@ -173,6 +173,54 @@ public abstract class GenericRepositoryImpl<T extends GenericEntity> implements 
         }
     }
 
+    @Override
+    public List<T> searchExactColumn(Map<String, List<String>> keyValues, String logicalOperator) {
+        List<T> list = new ArrayList<>();
+        try (Session session = sessionFactory.openSession()) {
+            session.beginTransaction();
+
+            // e.g
+            // id IN (:id0, :id1, :id2)
+            // AND/OR
+            // name IN (:name0, :name1, :name2)
+            String queryParam = getExactQueryParam(keyValues, logicalOperator);
+
+            Query<T> query = session.createQuery("from " + tableName + " where " + queryParam, clazz);
+
+            keyValues.forEach((column, values) -> {
+                for (int i = 0; i < values.size(); i++) {
+                    query.setParameter(String.format("%s%d", column, i), values.get(i), StringNVarcharType.INSTANCE);
+                }
+            });
+
+            list = query.list();
+
+            session.close();
+            return list;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return list;
+        }
+    }
+
+    private String getExactQueryParam(Map<String, List<String>> keyValue, String logicalOperator) {
+        List<String> columns = new ArrayList<>();
+
+        keyValue.forEach((column, values) -> {
+            // (:[columnName][index], ...)
+            //e.g
+            // (:id0, id1, id2)
+            String valueSet = values.stream()
+                    .map(value -> String.format(":%s%d", column, values.indexOf(value)))
+                    .collect(Collectors.joining(", ", "(", ")"));
+
+            columns.add(column + " in " + valueSet);
+        });
+
+        return columns.stream()
+                .collect(Collectors.joining(" " + logicalOperator + " ", " ", " "));
+    }
+
     public T findById(T entity) {
         Session session = null;
         try {

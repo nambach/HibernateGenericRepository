@@ -17,6 +17,8 @@ public interface GenericRepository<T> {
 
     List<T> searchExactColumn(List<String> values, String columnName);
 
+    List<T> searchExactColumn(Map<String, List<String>> keyValues, String logicalOperator);
+
     T findById(T entity);
 
     T findById(String id);
