@@ -1,12 +1,16 @@
 import model.Product;
+import model.User;
+import repository.UserRepository;
 import repository.generic.impl.GenericRepositoryImpl;
+import repository.impl.UserRepositoryImpl;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class Main {
 
     public static void main(String[] args) {
-        testHibernate();
+        testHibernate2();
     }
 
     private static void testSort() {
@@ -28,13 +32,27 @@ public class Main {
         });
     }
 
+    /**
+     * Postgre
+     */
     private static void testHibernate() {
         ProductRepositoryImpl repository = new ProductRepositoryImpl(GenericRepositoryImpl.getFactory());
 
         Product product = new Product("1", null, null);
 
-        for (Product product1 : repository.searchAll()) {
+        for (Product product1 : repository.getByNameAndId(Arrays.asList("Product 012", "Product 001"), Arrays.asList("1", "12"))) {
             System.out.println(product1);
+        }
+    }
+
+    /**
+     * Sql Server
+     */
+    private static void testHibernate2() {
+        UserRepository repository = new UserRepositoryImpl(GenericRepositoryImpl.getFactory());
+
+        for (User user : repository.getByNameAndId(Arrays.asList("Nam Bach", "20"), Arrays.asList("nambm"))) {
+            System.out.println(user);
         }
     }
 }

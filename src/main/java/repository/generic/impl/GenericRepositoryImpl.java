@@ -165,7 +165,7 @@ public abstract class GenericRepositoryImpl<T extends GenericEntity> implements 
 
             keyValues.forEach((column, values) -> {
                 for (int i = 0; i < values.size(); i++) {
-                    query.setParameter(String.format("%s%d", column, i), values.get(i), StringNVarcharType.INSTANCE);
+                    query.setParameter(String.format("%s%d", column, i), "%" + values.get(i) + "%", StringNVarcharType.INSTANCE);
                 }
             });
 
