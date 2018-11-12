@@ -13,9 +13,9 @@ public interface GenericRepository<T> {
 
     List<T> searchAll();
 
-    List<T> searchAlikeColumn(Map<String, List<String>> keyValues, String logicalOperator);
+    List<T> searchAlikeColumn(Map<String, List<String>> keyValues, String logicalOperator, boolean isUnicode);
 
-    List<T> searchExactColumn(Map<String, List<String>> keyValues, String logicalOperator);
+    List<T> searchExactColumn(Map<String, List<String>> keyValues, String logicalOperator, boolean isUnicode);
 
     T findById(T entity);
 

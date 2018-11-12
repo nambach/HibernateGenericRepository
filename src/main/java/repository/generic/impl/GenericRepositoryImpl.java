@@ -129,7 +129,7 @@ public abstract class GenericRepositoryImpl<T extends GenericEntity> implements 
     }
 
     @Override
-    public List<T> searchAlikeColumn(Map<String, List<String>> keyValues, String logicalOperator) {
+    public List<T> searchAlikeColumn(Map<String, List<String>> keyValues, String logicalOperator, boolean isUnicode) {
         List<T> list = new ArrayList<>();
         try (Session session = sessionFactory.openSession()) {
             session.beginTransaction();
@@ -144,7 +144,11 @@ public abstract class GenericRepositoryImpl<T extends GenericEntity> implements 
 
             keyValues.forEach((column, values) -> {
                 for (int i = 0; i < values.size(); i++) {
-                    query.setParameter(String.format("%s%d", column, i), "%" + values.get(i) + "%", StringNVarcharType.INSTANCE);
+                    if (isUnicode) {
+                        query.setParameter(String.format("%s%d", column, i), "%" + values.get(i) + "%", StringNVarcharType.INSTANCE);
+                    } else {
+                        query.setParameter(String.format("%s%d", column, i), "%" + values.get(i) + "%");
+                    }
                 }
             });
 
@@ -185,7 +189,7 @@ public abstract class GenericRepositoryImpl<T extends GenericEntity> implements 
     }
 
     @Override
-    public List<T> searchExactColumn(Map<String, List<String>> keyValues, String logicalOperator) {
+    public List<T> searchExactColumn(Map<String, List<String>> keyValues, String logicalOperator, boolean isUnicode) {
         List<T> list = new ArrayList<>();
         try (Session session = sessionFactory.openSession()) {
             session.beginTransaction();
@@ -200,7 +204,11 @@ public abstract class GenericRepositoryImpl<T extends GenericEntity> implements 
 
             keyValues.forEach((column, values) -> {
                 for (int i = 0; i < values.size(); i++) {
-                    query.setParameter(String.format("%s%d", column, i), values.get(i), StringNVarcharType.INSTANCE);
+                    if (isUnicode) {
+                        query.setParameter(String.format("%s%d", column, i), values.get(i), StringNVarcharType.INSTANCE);
+                    } else {
+                        query.setParameter(String.format("%s%d", column, i), values.get(i));
+                    }
                 }
             });
 

@@ -1,6 +1,5 @@
 package repository.impl;
 
-import model.Product;
 import model.User;
 import org.hibernate.SessionFactory;
 import repository.UserRepository;
@@ -32,6 +31,6 @@ public class UserRepositoryImpl extends GenericRepositoryImpl<User> implements U
         Map<String, List<String>> keyValues = new HashMap<>();
         keyValues.put("username", ids);
         keyValues.put("name", names);
-        return searchAlikeColumn(keyValues, "OR");
+        return searchAlikeColumn(keyValues, "OR", true);
     }
 }
